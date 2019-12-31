@@ -3,14 +3,14 @@ import json
 import time
 import os
 import psutil
-import ConfigParser
+import configparser
 from subprocess import call
 from time import sleep
 
 class WebManager(WebStructure.WebAbstract):
 	def __init__(self,webconf):
 		self.webconf=webconf
-		config = ConfigParser.ConfigParser()
+		config = configparser.ConfigParser()
 		config.readfp(open('/etc/raspadmin/bell.conf'))
 		self._port=int(config.get("NET", "port"))
 		self._start="/usr/sbin/service bell start"
@@ -19,8 +19,8 @@ class WebManager(WebStructure.WebAbstract):
 	def get_html(self,http_context):
 		template=['header.tpl','bell/bell.tpl','footer.tpl']
 
-                sessionid=http_context.sessionid
-                sessionvars=http_context.session.get_vars(sessionid)
+		sessionid=http_context.sessionid
+		sessionvars=http_context.session.get_vars(sessionid)
 		
 		if http_context.suburl=="ACK":
 			if os.path.isfile("/tmp/BELLRESPONSE"):
@@ -51,6 +51,6 @@ class WebManager(WebStructure.WebAbstract):
 		return WebStructure.HttpContext(statuscode=200,content={'isOpen':isOpen,'isFile':isFile,'token':sessionvars['posttoken']},template=template,mimetype='text/html')
 		
 
-        def get_module_name(self):
-                return "Bell"
+	def get_module_name(self):
+		return "Bell"
 

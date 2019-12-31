@@ -1,6 +1,6 @@
 from .. import WebStructure 
 import json
-import evohome
+from . import evohome
 
 class WebManager(WebStructure.WebAbstract):
 	def __init__(self,webconf):
@@ -14,12 +14,12 @@ class WebManager(WebStructure.WebAbstract):
 			abs+=str(hour)+','
 		abs=abs[:-1]+']'
 		results={}
-		for captor in history.keys():
+		for captor in list(history.keys()):
 			if captor!='base_hours':
 				temp=""
 				result=history[captor]
 				for hour in hours:
-					if hour in result.keys():
+					if hour in list(result.keys()):
 						temp+=str(result[hour])+','
 					else:
 						temp+='0,'
@@ -33,14 +33,13 @@ class WebManager(WebStructure.WebAbstract):
 	def get_html(self,http_context):
 		template=['header.tpl','evohome/evohome.tpl','footer.tpl']
 
-                sessionid=http_context.sessionid
-                sessionvars=http_context.session.get_vars(sessionid)
+		sessionid=http_context.sessionid
+		sessionvars=http_context.session.get_vars(sessionid)
 		
 		(temperatures,weather)=self.evohome.getCurrentValues()
 		history=self.format_data(self.evohome.getHistory())
 		return WebStructure.HttpContext(statuscode=200,content={'token':sessionvars['posttoken'],'history':history,'weather':weather,'temperatures':temperatures},template=template,mimetype='text/html')
 		
-
-        def get_module_name(self):
-                return "EvoHome"
+	def get_module_name(self):
+		return "EvoHome"
 

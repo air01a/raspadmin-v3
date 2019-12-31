@@ -1,16 +1,16 @@
 from .. import WebStructure 
-import ConfigParser
-from downloader import DownloadManager
+import configparser
+from .downloader import DownloadManager
 import json
 import rarfile
 from threading import Thread
-from alldebrid import AllDebrid
+from .alldebrid import AllDebrid
 
 class WebManager(WebStructure.WebAbstract):
 	def __init__(self,webconf):
 		self.webconf=webconf
-		config = ConfigParser.ConfigParser()
-                config.readfp(open('/etc/raspadmin/downloader.conf'))
+		config = configparser.ConfigParser()
+		config.readfp(open('/etc/raspadmin/downloader.conf'))
 		self.path=config.get("PATH","downloadrep")
 		self.alldebrid=0
 		try:
@@ -35,7 +35,7 @@ class WebManager(WebStructure.WebAbstract):
 					if error!=0:
 						url=url2
 					else:
-						print error
+						print(error)
 			#  https://github.com/usineur/go-debrid/blob/master/alldebrid/debrid.go
 			self.downloadManager.addDownload(url)
 			
@@ -53,9 +53,9 @@ class WebManager(WebStructure.WebAbstract):
 		template=['header.tpl','downloader/downloader.tpl','footer.tpl']
 		sessionid=http_context.sessionid
 		sessionvars=http_context.session.get_vars(sessionid)
-                post=http_context.http_post
+		post=http_context.http_post
 
-		if 'str_download' in post.keys():
+		if 'str_download' in list(post.keys()):
 			self.manage_download(post['str_download'])
 
 		if http_context.suburl=='getInfo' :
@@ -63,14 +63,14 @@ class WebManager(WebStructure.WebAbstract):
 		if http_context.suburl=='unrar' and 'str_file' in http_context.http_get:
 			try:
 				t = Thread(target=self.unrar, args = (http_context.http_get['str_file'],))
-   				t.daemon = True
-    				t.start()
+				t.daemon = True
+				t.start()
 			except Exception as e:
-				print repr(e)
+				print(repr(e))
 				
 
 		content={'token':sessionvars['posttoken'],'includefile':'downloader/headerdownloader.html'}	
 		return WebStructure.HttpContext(statuscode=200,content=content,template=template,mimetype='text/html')
 
-        def get_module_name(self):
-                return "Downloader"
+	def get_module_name(self):
+		return "Downloader"

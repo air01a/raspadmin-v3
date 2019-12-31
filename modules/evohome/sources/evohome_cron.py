@@ -1,10 +1,10 @@
-import ConfigParser
+import configparser
 from evohomeclient2 import EvohomeClient
 import sqlite3
 import time
 import json
 
-config = ConfigParser.ConfigParser()
+config = configparser.ConfigParser()
 config.readfp(open('/etc/raspadmin/evohome.conf'))
 login=config.get("EVOHOME", "login")
 password=config.get("EVOHOME", "password")
@@ -26,7 +26,7 @@ if extemp=="True":
         observation = owm.weather_at_place(city)
         w = observation.get_weather()
         temperature=w.get_temperature('celsius')['temp']
-	print temperature
+	print(temperature)
 	cursor.execute("INSERT INTO data(name,temp,time) VALUES(?,?,?)",("Ext",temperature,date))	
 
 

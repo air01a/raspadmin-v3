@@ -85,8 +85,10 @@ class WebManager(WebStructure.WebAbstract):
 
 	def list_dir(self,post):
 		path=self._filemanager.path_decode(post['base64_dir'])
+
 		directory=self._filemanager.list_dir_from_path(path)
 		files=self._filemanager.list_file_from_path(path)
+
 		completefile=[]
 		for f in directory:
 			tmp={}
@@ -183,7 +185,7 @@ class WebManager(WebStructure.WebAbstract):
 				b64path=""
 		if b64path=="":
 			b64path=self._filemanager.get_base_path(True)	
-		content={'error':error,'errorstr':errorstr,'action':action,'b64path':b64path.decode('utf-8'),'includefile':'filemanager/headerfilemanager.html','token':sessionvars['posttoken']}
+		content={'error':error,'errorstr':errorstr,'action':action,'b64path':b64path,'includefile':'filemanager/headerfilemanager.html','token':sessionvars['posttoken']}
 		return WebStructure.HttpContext(statuscode=200,content=content,template=template,mimetype='text/html')
 
 

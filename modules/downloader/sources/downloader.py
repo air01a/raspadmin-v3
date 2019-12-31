@@ -4,7 +4,7 @@ import time
 import threading
 progress=[]
 import sys
-import urllib
+import urllib.request, urllib.parse, urllib.error
 
 class Downloader(Thread):
 
@@ -15,7 +15,7 @@ class Downloader(Thread):
 		self.bandwidth = 0
 
 	def fileToDownload(self):
-		for i in xrange(0,len(self.aToDownload)):
+		for i in range(0,len(self.aToDownload)):
 			sys.stdout.flush()
 			if self.aToDownload[i]['state']=='w':
 				self.next=i
@@ -24,10 +24,10 @@ class Downloader(Thread):
 
 	def run(self):
 		while self.fileToDownload()!=False:
-			url=self.aToDownload[self.next]['url']
+			url=self.aToDownload[self.__next__]['url']
 			try:
 				self.aToDownload[self.next]['id']=self.next
-				file_name = self.aToDownload[self.next]['path']
+				file_name = self.aToDownload[self.__next__]['path']
 				self.aToDownload[self.next]['state']='d'
 				with open(file_name, "wb+") as f:
 					response = requests.get(url, stream=True)
@@ -36,7 +36,7 @@ class Downloader(Thread):
 						f.write(response.content)
 						self.aToDownload[self.next]['state']='E'
 					else:
-            					total_length = int(total_length)
+						total_length = int(total_length)
 						self.aToDownload[self.next]['length']=total_length
 						dl = 0
 						self.bandwidth = 0
@@ -65,18 +65,18 @@ class DownloadManager():
 		self.thread.start()
 
 	def get_format_size(self,number):
-                number=float(number)
-                extension = [ 'B', 'KB', 'MB','GB' ]
-                for i in range(len(extension)):
-                        if number/1024<1:
-                                return str(round(number,2))+ " " + extension[i]
-                        else:
-                                number=number/1024
-                return str(round(number*1024,2))+" "+"Gb"
+		number=float(number)
+		extension = [ 'B', 'KB', 'MB','GB' ]
+		for i in range(len(extension)):
+			if number/1024<1:
+				return str(round(number,2))+ " " + extension[i]
+			else:
+				number=number/1024
+		return str(round(number*1024,2))+" "+"Gb"
 
 	def addDownload(self, url):
 		try:
-			file_name = urllib.unquote(url[url.rfind('/') + 1:])
+			file_name = urllib.parse.unquote(url[url.rfind('/') + 1:])
 		except:
 			self.aToDownload.append({'url':url,'path':'Error','filename':'error','state':'E','progression':0,'length':0,'id':-1,'rar':'f'})
 			return
