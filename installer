@@ -1,0 +1,234 @@
+#!/bin/bash
+#############################################################
+# Const Vars
+#############################################################
+DEFAULTINSTALLDIR="/opt/raspadmin"
+DEFAULTPORT="443"
+CONFIGDIR="/etc/raspadmin"
+
+#############################################################
+# Functions
+#############################################################
+function ask_question {
+    message=$1
+    has_constraints=0
+    if [ "$2" !=  "" ] ; then
+        constraints=$2
+        has_constraints=1
+    fi
+    not_valid=1
+    while [ $not_valid -ne 0 ] ; do
+        echo -en  $message
+        read var
+        not_valid=0
+        if [ $has_constraints -ne 0 ]; then
+            not_valid=1
+            for i in $(echo $constraints | sed -e "s/;/ /g"); do
+                if [ "$var" == "$i" ]; then
+                    ask_question=$var
+                    return
+                fi
+            done
+        fi
+    done
+    ask_question=$var
+}
+
+function get_boolean_value {
+    mess=$(expr substr $1 1 1)
+    if [ "$mess" == "y" ] || [ "$mess" == "Y" ] ; then
+        echo -n "1"
+    else
+        echo -n "0"
+    fi
+}
+
+function read_ini_file {
+    inifile=$1
+    pattern=$2
+    [[ ! -f $inifile ]] && return 
+    result=$(grep $pattern $inifile | cut -d'=' -f2)
+    echo $result
+}
+
+
+
+#############################################################
+# Checking requirements
+#############################################################
+clear
+echo "---------------------------------------------"
+echo "Welcome to raspadmin installer"
+echo "---------------------------------------------"
+echo ""
+echo -e " Checking requirements : \e[34mIn progress\e[0m"
+echo -e " Configuration         : \e[91mWaiting\e[0m"
+echo -e " Copying files         : \e[91mWaiting\e[0m"
+echo ""
+echo ""
+echo "----- Package configuration"
+echo ""
+
+if [ "$(whoami)" != "root" ] ; then
+	echo "######### Error, you need to be root to execute this script"
+	echo " Please use sudo"
+	exit 2	
+
+fi
+
+
+dpkg -s python3-pip > /dev/null 2>&1
+pip=$?
+
+dpkg -s python3-dev > /dev/null 2>&1
+dev=$?
+
+if [ "$pip" == "1" ]; then
+	echo "Installing pip"
+	apt-get install python3-pip
+fi
+
+if [ "$dev" == "1" ]; then
+        echo "Installing python3-dev"
+        apt-get install python3-dev
+
+fi
+
+echo "Installing needed libraries via pip"
+pip3 install quik
+pip3 install netifaces
+pip3 install RPi.GPIO
+pip3 install psutil
+pip3 install requests
+
+#############################################################
+# Asking question
+#############################################################
+clear
+echo "---------------------------------------------"
+echo "Welcome to raspadmin installer"
+echo "---------------------------------------------"
+echo ""
+echo -e " Checking requirements : \e[92mDone\e[0m"
+echo -e " Configuration         : \e[34mIn progress\e[0m"
+echo -e " Copying files         : \e[91mWaiting\e[0m"
+echo ""
+echo "Please answer few questions for the installation process"
+echo ""
+echo "----- Directory configuration"
+echo ""
+
+NO_CONSTRAINTS="y;Y;n;N;No;NO;no;yes;Yes;YEs;YES"
+installdir=""
+
+if [ -f /etc/raspadmin/raspadmin.conf ] ; then
+	echo -e "Setup has detected an existing configuration file"
+	ask_question "Would you like to keep it ? [y/n] [ \e[31mSelection y if you just want to update\e[0m ] : " $NO_CONSTRAINTS
+	answer=$(get_boolean_value $ask_question)
+	if [ $answer -eq 1 ] ; then
+		installdir=$(read_ini_file "/etc/raspadmin/raspadmin.conf" "staticfiledir" | sed -e "s/static//g")
+	fi
+fi
+
+if [ "$installdir" == "" ] ; then
+	ask_question "Please enter the default home directory for user [ $DEFAULTINSTALLDIR ] : "
+	installdir=$ask_question
+	[[ "$installdir" == "" ]] && installdir=$DEFAULTINSTALLDIR
+	
+	ask_question "Please enter the port [ $DEFAULTPORT ] : "
+	port=$ask_question
+	[[ "$port" == "" ]] && port=$DEFAULTPORT
+	
+	ask_question "Use SSL [y/n] : " $NO_CONSTRAINTS
+	ssl=$(get_boolean_value $ask_question)
+
+	[[ ! -d $CONFIGDIR ]] && mkdir $CONFIGDIR
+
+	
+	if [ "$ssl" == "1" ] ; then 
+		ssl=yes
+		ask_question "Do you have your own certificate  [y/n] : " $NO_CONSTRAINTS
+		owncert=$(get_boolean_value $ask_question)
+
+		if [ $owncert -eq 1 ] ; then
+			certificate_path="/"
+			while [ ! -f "$certificate_path" ] ; do 
+				ask_question "Path to your certificate : "
+				certificate_path=$ask_question
+				[[ -f $certificate_path ]] || echo "Invalid path"
+			done
+			key_path="/"
+			while [ ! -f "$key_path" ] ; do
+				ask_question "Path to your private key : "
+				key_path=$ask_question
+				[[ -f $key_path ]] || echo "Invalid path"
+			done
+		else
+                        openssl genrsa  -out $CONFIGDIR/cert.key 1024
+                        openssl req -new -key $CONFIGDIR/cert.key -out $CONFIGDIR/cert.csr
+                        openssl x509 -req -days 4000 -in $CONFIGDIR/cert.csr -signkey $CONFIGDIR/cert.key -out $CONFIGDIR/cert.crt
+                        rm -f $CONFIGDIR/cert.csr
+                        certificate_path="$CONFIGDIR/cert.crt"
+                        key_path="$CONFIGDIR/cert.key"
+		fi
+	else
+		ssl="no"
+		certificate_path=""
+		key_path=""
+	fi
+
+	
+	sed -e "s#\$PORT#$port#" -e "s#\$INSTALLDIR#$installdir#" -e "s#\$CERT#$certificate_path#" -e "s#\$KEY#$key_path#" -e "s#\$SSL#$ssl#"  conf/raspadmin.conf > $CONFIGDIR/raspadmin.conf
+
+fi
+
+
+clear
+echo "---------------------------------------------"
+echo "Welcome to raspadmin installer"
+echo "---------------------------------------------"
+echo ""
+echo -e " Checking requirements : \e[92mDone\e[0m"
+echo -e " Configuration         : \e[92mDone\e[0m"
+echo -e " Copying files         : \e[34mWaiting\e[0m"
+echo ""
+echo "----- Installation"
+echo ""
+
+[[ -d /var/log/raspadmin ]] || mkdir /var/log/raspadmin
+
+echo ""
+echo "----- File copy"
+[[ -d "$installdir" ]] ||  mkdir $installdir
+cp -R sources/* $installdir
+
+echo "----- Right management"
+chown -R root:root $installdir
+chmod -R 770 $installdir
+chmod +x /etc/init.d/raspadmin
+chmod 770 /var/log/raspadmin
+
+echo "----- StartUp "
+sed -e "s#\$INSTALLDIR#$installdir#" init/raspadmin > /etc/init.d/raspadmin
+chmod 755 /etc/init.d/raspadmin
+update-rc.d raspadmin defaults
+echo ""
+
+clear
+echo "---------------------------------------------"
+echo "Welcome to raspadmin installer"
+echo "---------------------------------------------"
+echo ""
+echo -e " Checking requirements : \e[92mDone\e[0m"
+echo -e " Configuration         : \e[92mDone\e[0m"
+echo -e " Copying files         : \e[92mDone\e[0m"
+echo ""
+echo " To start the application : sudo service raspadmin start"
+echo " To install modules (NAS, pyload, gateone, ...), proceed as following :"
+echo "   * cd modules"
+echo "   * sudo ./installer"
+echo ""
+echo " Please read information about this module in the wiki page of this project"
+echo " https://github.com/air01a/raspadmin/wiki/Module"
+
+
