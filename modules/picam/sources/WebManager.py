@@ -2,8 +2,8 @@ from .. import WebStructure
 import io
 import base64
 import json
-import ConfigParser
-from servo import ServoManager
+import configparser
+from .servo import ServoManager
 import picamera
 
 class WebManager(WebStructure.WebAbstract):
@@ -14,8 +14,8 @@ class WebManager(WebStructure.WebAbstract):
 		self._brightness=50
 		self._exposureCompensation=0
 
-                config = ConfigParser.ConfigParser()
-                config.readfp(open('/etc/raspadmin/picam.conf'))
+		config = configparser.ConfigParser()
+		config.readfp(open('/etc/raspadmin/picam.conf'))
 		self._servoX=config.get("PICAM", "useServoXaxis")
 
 		self._useGPIOPower       = config.get("PICAM", "useGpioPowerSwitch")
@@ -78,7 +78,7 @@ class WebManager(WebStructure.WebAbstract):
 			self.camera.exposure_compensation=value
 
 	def webService(self,post):
-		if not 'alphanum_action' in post.keys():
+		if not 'alphanum_action' in list(post.keys()):
 			return WebStructure.HttpContext(statuscode=200,content=None,template=None,mimetype='text/html')
 		action=post['alphanum_action']
 
@@ -92,7 +92,7 @@ class WebManager(WebStructure.WebAbstract):
 			self.setExposureCompensation(10)
 			return self.noError()
 		elif action=='exposure_dec':
-                        self.setExposureCompensation(-10)
+			self.setExposureCompensation(-10)
 			return self.noError()
 		elif action=='movex_inc' and self._servoX=="1":
 			self._servo.inc()
@@ -108,7 +108,7 @@ class WebManager(WebStructure.WebAbstract):
 		template=['header.tpl','picam/picam.tpl','footer.tpl']
 		sessionid=http_context.sessionid
 		sessionvars=http_context.session.get_vars(sessionid)
-                post=http_context.http_post
+		post=http_context.http_post
 
 
 		if http_context.suburl=='getimage.mjpg':
@@ -126,5 +126,5 @@ class WebManager(WebStructure.WebAbstract):
 		content={'isActive':self.isActive,'token':sessionvars['posttoken'],'manageServoX':self._servoX,'gpioSwitch':self._useGPIOPower}	
 		return WebStructure.HttpContext(statuscode=200,content=content,template=template,mimetype='text/html')
 
-        def get_module_name(self):
-                return "PiCam"
+	def get_module_name(self):
+		return "PiCam"

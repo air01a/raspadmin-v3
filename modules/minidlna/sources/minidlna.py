@@ -1,6 +1,6 @@
 import os
 import sys
-import ConfigParser
+import configparser
 import subprocess 
 from time import sleep
 from ..lib import process
@@ -11,9 +11,9 @@ import base64
 class MiniDlna:
 	def __init__(self, conf):
 		self._conf = conf
-		config = ConfigParser.ConfigParser()
-                config.readfp(open('/etc/raspadmin/minidlna.conf'))
-                self._dbfile=config.get("MINIDLNA", "dbpath")
+		config = configparser.ConfigParser()
+		config.readfp(open('/etc/raspadmin/minidlna.conf'))
+		self._dbfile=config.get("MINIDLNA", "dbpath")
 		self._forcereload=config.get("MINIDLNA", "forcereload").split(' ')
 		self._stop=config.get("MINIDLNA", "stop").split(' ')
 		self._start=config.get("MINIDLNA", "start").split(' ')
@@ -22,17 +22,17 @@ class MiniDlna:
 		self._dlnaconffile=config.get("MINIDLNA", "conffile")
 		self.read_db()
 
-        def write_db(self,vars=None):
-                if vars==None:
-                        vars=self._internaldb
-                jsondb=json.dumps(vars)
-                try:
-                        db=open(self._dbfile,"w+")
-                        db.write(jsondb)
-                        db.close()
-                except:
-                        return 50
-                return 0
+	def write_db(self,vars=None):
+		if vars==None:
+			vars=self._internaldb
+		jsondb=json.dumps(vars)
+		try:
+			db=open(self._dbfile,"w+")
+			db.write(jsondb)
+			db.close()
+		except:
+			return 50
+		return 0
 
 	def write_config(self):
 		strshare=""
@@ -46,22 +46,22 @@ class MiniDlna:
 				strshare+='V,'	
 			strshare+=share['path']+"\n"
 		config=loadtpl.load_tpl(self._minidlnatplshare,{'@media_dir':strshare})
-                try:
-                        dlnafile=open(self._dlnaconffile,"w+")
-                        dlnafile.write(config)
-                        dlnafile.close()
-                except:
-                        return 60
+		try:
+			dlnafile=open(self._dlnaconffile,"w+")
+			dlnafile.write(config)
+			dlnafile.close()
+		except:
+			return 60
 		return 0
 	
-        def read_db(self):
-                db=open(self._dbfile,"r")
+	def read_db(self):
+		db=open(self._dbfile,"r")
 		try:
-                	self._internaldb=json.loads(db.read())
+			self._internaldb=json.loads(db.read())
 			db.close()
 		except:
 			self._internaldb=[]
-                return 0
+		return 0
 
 
 	def check_status(self):
@@ -96,15 +96,15 @@ class MiniDlna:
 	
 	def get_shares(self):
 		ret=[]
-                for i in self._internaldb:
-                        i['b64path']=base64.b64encode(i['path'])
-                        ret.append(i)
-                return ret
+		for i in self._internaldb:
+			i['b64path']=base64.b64encode(i['path'])
+			ret.append(i)
+		return ret
 
 	def get_error(self,errorcode):
 		errorstr={0:'No Error',10:'Share not found',40:'Share already exists'}
 
-		if errorcode in errorstr.keys():
+		if errorcode in list(errorstr.keys()):
 			return errorstr[errorcode]
 		return 'Unknown error'
 

@@ -1,12 +1,12 @@
 from .. import WebStructure 
-from gpio import RaspGpio
+from .gpio import RaspGpio
 import json
 import time
 
 class WebManager(WebStructure.WebAbstract):
 	def __init__(self,webconf):
 		self.webconf=webconf
-                self._gpio=RaspGpio(webconf['confdir']+'/gpio.conf')
+		self._gpio=RaspGpio(webconf['confdir']+'/gpio.conf')
 
 	def set_mode(self,pin,mode):
 		if mode=='IN':
@@ -16,35 +16,33 @@ class WebManager(WebStructure.WebAbstract):
 		error=self._gpio.setgpiomode(int(pin),mode)
 		content={'summary':self._gpio.getsummary()}
 		content['error']=error
-                content['errormsg']=self._gpio.geterrorstr(error)
+		content['errormsg']=self._gpio.geterrorstr(error)
 
 		content=json.dumps(content)
 		return WebStructure.HttpContext(statuscode=200,content=content,template=None,mimetype='text/html')
 
 
 	def set_state(self, pin, state):
-		print state
+		print(state)
 		error=self._gpio.setgpio(int(pin),int(state))
-                content={'summary':self._gpio.getsummary()}
-                content['error']=error
-                content['errormsg']=self._gpio.geterrorstr(error)
-
-                content=json.dumps(content)
-
-                return WebStructure.HttpContext(statuscode=200,content=content,template=None,mimetype='text/html')
+		content={'summary':self._gpio.getsummary()}
+		content['error']=error
+		content['errormsg']=self._gpio.geterrorstr(error)
+		content=json.dumps(content)
+		return WebStructure.HttpContext(statuscode=200,content=content,template=None,mimetype='text/html')
 
 
 	def get_html(self,http_context):
 		template=['header.tpl','gpio/gpio.tpl','footer.tpl']
 
-                sessionid=http_context.sessionid
-                sessionvars=http_context.session.get_vars(sessionid)
+		sessionid=http_context.sessionid
+		sessionvars=http_context.session.get_vars(sessionid)
 		
 		if (http_context.suburl=='init' and not self._gpio.isInitialized()):
 			self._gpio.init()
 		
-                if (http_context.suburl=='clean'):
-                        self._gpio.clean()
+		if (http_context.suburl=='clean'):
+			self._gpio.clean()
 
 		if self._gpio.isInitialized():
 			if (http_context.suburl=='mode'):
@@ -61,6 +59,6 @@ class WebManager(WebStructure.WebAbstract):
 		return WebStructure.HttpContext(statuscode=200,content={'summary':summary,'token':sessionvars['posttoken']},template=template,mimetype='text/html')
 		
 
-        def get_module_name(self):
-                return "Gpio"
+	def get_module_name(self):
+		return "Gpio"
 

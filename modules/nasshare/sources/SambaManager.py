@@ -1,4 +1,4 @@
-import ConfigParser
+import configparser
 import grp
 import json
 import base64
@@ -8,7 +8,7 @@ from ..lib import loadtpl
 class SambaManager:
 	def __init__(self,webconf):
 		self._webconf=webconf
-		config = ConfigParser.ConfigParser()
+		config = configparser.ConfigParser()
 		config.readfp(open('/etc/raspadmin/nassamba.conf'))
 		self._basedir=config.get("SHARE", "basedir")
 		self._sambaconffile=config.get("SHARE", "sambaconffile")
@@ -18,18 +18,17 @@ class SambaManager:
 		self._workgroup=config.get("SHARE", "workgroup")
 		self._netbiosname=config.get("SHARE", "netbiosname")
 		self._dbfile=config.get("SHARE","dbfile")
-                config.readfp(open('/etc/raspadmin/nasuser.conf'))
-                self._nasgroup=config.get("USERS", "nasgroup")
+		config.readfp(open('/etc/raspadmin/nasuser.conf'))
+		self._nasgroup=config.get("USERS", "nasgroup")
 		self.read_db()
 		self.clean_db()
 
 	def get_nas_user(self):
-                users=[]
-                tmp=grp.getgrnam(self._nasgroup).gr_mem
-                for user in tmp:
-                        users.append(user)
-
-                return users
+		users=[]
+		tmp=grp.getgrnam(self._nasgroup).gr_mem
+		for user in tmp:
+			users.append(user)
+		return users
 
 	def get_base_dir(self):
 		return self._basedir
@@ -56,7 +55,7 @@ class SambaManager:
 		return loadtpl.load_tpl(self._sambatplshare,vars)
 
 	def find_share_from_path(self,path):
-        	for i in range(0,len(self._internaldb)):
+		for i in range(0,len(self._internaldb)):
 			if self._internaldb[i]['path']==path:
 				return self._internaldb[i]
 		return None
@@ -67,7 +66,7 @@ class SambaManager:
 			validuser=self._internaldb[share]['validusers'].split(',')
 			writeuser=self._internaldb[share]['writelist'].split(',')
 			self._internaldb[share]['validusers']=','.join(i for i in validuser if i in user)
-         		self._internaldb[share]['writelist']=','.join(i for i in writeuser  if i in user)
+			self._internaldb[share]['writelist']=','.join(i for i in writeuser  if i in user)
 	
 
 	def write_db(self,vars=None):
@@ -158,7 +157,7 @@ class SambaManager:
 
 	def get_error_str(self,error):
 		errorstr={0:'No Error',10:'Unknown share',41:'Error :  share name exists',50:'Error Writing db', 60:'Error writing samba config file',42:'Share does not exist',43:'Share path exists'}
-		if error in errorstr.keys():
+		if error in list(errorstr.keys()):
 			return errorstr[error]
 		return 'Unknow error'
 
@@ -166,9 +165,9 @@ def main():
 	sambamanager=SambaManager('')
 	#print sambamanager.get_error_str(sambamanager.add_share('testi7','test7','comment',True,False,True,'1,2','1,2'))
 	sambamanager.read_db()
-	print sambamanager.get_db()
+	print(sambamanager.get_db())
 	sambamanager.clean_db()
-	print sambamanager.get_db()
+	print(sambamanager.get_db())
 
 	#print sambamanager.write_samba_config()
 

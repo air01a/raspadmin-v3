@@ -1,6 +1,6 @@
 from .. import WebStructure 
 from ..lib import FileManager
-from SambaManager import SambaManager
+from .SambaManager import SambaManager
 import json
  
 class WebManager(WebStructure.WebAbstract):
@@ -10,18 +10,18 @@ class WebManager(WebStructure.WebAbstract):
 		self._filemanager=FileManager.FileManager(self._sambamanager.get_base_dir())
 
 	def browsedirectory(self,http_context):
-                if 'base64_file' in http_context.http_get.keys():
-                        path=self._filemanager.path_decode(http_context.http_get['base64_file'])
-                else:
-                        path='/'
+		if 'base64_file' in list(http_context.http_get.keys()):
+			path=self._filemanager.path_decode(http_context.http_get['base64_file'])
+		else:
+			path='/'
 
 		dirlist=self._filemanager.list_dir_from_path(path)
 		return WebStructure.HttpContext(statuscode=200,content=json.dumps(dirlist),template=None,mimetype='text/html')
 
 	def modify(self,http_context):
 		template=['header.tpl','share/modify.tpl','footer.tpl']
-                sessionid=http_context.sessionid
-                sessionvars=http_context.session.get_vars(sessionid)
+		sessionid=http_context.sessionid
+		sessionvars=http_context.session.get_vars(sessionid)
 	
 		post=http_context.http_post
 		path=post['base64_path']
@@ -30,12 +30,12 @@ class WebManager(WebStructure.WebAbstract):
 		errorstr='No error'
 		
 		
-		if 'alphanum_action' in post.keys():
+		if 'alphanum_action' in list(post.keys()):
 			name=post['alphanum_name']
 			comment=post['str_comment']
-			public=True if 'alphanum_public' in post.keys() else False
-			writable=True if 'alphanum_writable' in post.keys() else False
-			readonly=True if 'alphanum_readonly' in post.keys() else False
+			public=True if 'alphanum_public' in list(post.keys()) else False
+			writable=True if 'alphanum_writable' in list(post.keys()) else False
+			readonly=True if 'alphanum_readonly' in list(post.keys()) else False
 			reader=post['str_reader']
 			writer=post['str_writer']
 			if len(reader)>1 and reader[-1]==',':
@@ -73,15 +73,15 @@ class WebManager(WebStructure.WebAbstract):
 			alluserwrite=[i for i in alluserwritetmp if not i in writelist]
 
 		else:
-                        name=""
+			name=""
 			comment=""
-                        readonly=""
-                        public=""
-                        writable=""
-                        writelist=[]
-                        validusers=[]
+			readonly=""
+			public=""
+			writable=""
+			writelist=[]
+			validusers=[]
 			alluserread=self._sambamanager.get_nas_user()
-                        alluserwrite=self._sambamanager.get_nas_user()
+			alluserwrite=self._sambamanager.get_nas_user()
 			action="new"
 
 		content={'path':path,'pathtxt':pathtxt,'token':sessionvars['posttoken'],'name':name,'comment':comment,'readonly':readonly,'public':public,'writable':writable,'writelist':writelist,'validusers':validusers,'alluserread':alluserread,'alluserwrite':alluserwrite}
@@ -91,8 +91,8 @@ class WebManager(WebStructure.WebAbstract):
 
 	def get_html(self,http_context):
 		template=['header.tpl','share/share.tpl','footer.tpl']
-                sessionid=http_context.sessionid
-                sessionvars=http_context.session.get_vars(sessionid)
+		sessionid=http_context.sessionid
+		sessionvars=http_context.session.get_vars(sessionid)
 		
 		error=0
 		errorstr="No Error"
@@ -102,9 +102,9 @@ class WebManager(WebStructure.WebAbstract):
 			return self.browsedirectory(http_context)
 
 		if http_context.suburl=='delete':
-			if 'base64_path' in http_context.http_post.keys():
+			if 'base64_path' in list(http_context.http_post.keys()):
 				path=http_context.http_post['base64_path']
-		                pathtxt=self._filemanager.path_decode(path)
+				pathtxt=self._filemanager.path_decode(path)
 				share=self._sambamanager.find_share_from_path(pathtxt)
 				if share:
 					self._sambamanager.delete_share(share['name'])
@@ -112,7 +112,7 @@ class WebManager(WebStructure.WebAbstract):
 
 
 		if http_context.suburl=='modify':
-			if 'base64_path' in http_context.http_post.keys():
+			if 'base64_path' in list(http_context.http_post.keys()):
 				ret=self.modify(http_context)
 				if ret!=None:
 					return ret
@@ -124,6 +124,6 @@ class WebManager(WebStructure.WebAbstract):
 		return WebStructure.HttpContext(statuscode=200,content={'share':share,'action':action,'error':error,'errorstr':errorstr,'token':sessionvars['posttoken']},template=template,mimetype='text/html')
 		
 
-        def get_module_name(self):
-                return "NAS-Share"
+	def get_module_name(self):
+		return "NAS-Share"
 

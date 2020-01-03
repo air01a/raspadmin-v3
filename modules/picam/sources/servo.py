@@ -63,7 +63,7 @@ class ServoManager:
 		else:
 			switch="0"
 			switchpin="0"
-	 	s = subprocess.check_output(["python",self._binaryPath,str(pulse),str(self._pinNumber),switch,switchpin])
+		s = subprocess.check_output(["python",self._binaryPath,str(pulse),str(self._pinNumber),switch,switchpin])
 
 
 	def start(self,initial=-1):
@@ -100,7 +100,7 @@ def main():
 	RPIO.setmode(RPIO.BCM)		
 	if switch=="1":
                 RPIO.setup(switchpin, RPIO.OUT)
-		RPIO.output(switchpin,True)
+	RPIO.output(switchpin,True)
 	
 	servo = RPIO.PWM.Servo()
 	servo.set_servo(pin, pulse)

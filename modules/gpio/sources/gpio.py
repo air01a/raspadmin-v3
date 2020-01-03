@@ -1,5 +1,5 @@
 import RPi.GPIO as GPIO
-import ConfigParser
+import configparser
 
 
 class RaspGpio:
@@ -29,7 +29,7 @@ class RaspGpio:
 		GPIO.cleanup()
 
 	def loadconf(self,conf):
-		config = ConfigParser.ConfigParser()
+		config = configparser.ConfigParser()
 		config.readfp(open(conf))
 		gpioavailable=config.get("GPIO", "portavailable").split(',')
 		self._gpioavailable=[int(i) for i in gpioavailable]
@@ -53,11 +53,11 @@ class RaspGpio:
 		return 0
 
 	def getgpiomode(self,pin,text=False):
-                if not self._init:
-                        return 10
+		if not self._init:
+			return 10
 
-                if not pin in self._gpioavailable:
-                        return 5
+		if not pin in self._gpioavailable:
+			return 5
 
 		tmp=GPIO.gpio_function(pin)
 		if text:
@@ -65,26 +65,25 @@ class RaspGpio:
 		return tmp
 
 	def readgpio(self,pin):
-                if not self._init:
-                        return 10
+		if not self._init:
+			return 10
 
-                if not pin in self._gpioavailable:
-                        return 5
+		if not pin in self._gpioavailable:
+			return 5
 
 		return GPIO.input(pin)
 
 	def setgpio(self,pin,value):
+		if not self._init:
+			return 10
 
-                if not self._init:
-                        return 10
-
-                if not pin in self._gpioavailable:
-                        return 5
+		if not pin in self._gpioavailable:
+			return 5
  
 
-                if value not in [GPIO.HIGH,GPIO.LOW]:
-                        return 6
-                print "Set "+str(pin)+" to "+str(value)
+		if value not in [GPIO.HIGH,GPIO.LOW]:
+			return 6
+		print("Set "+str(pin)+" to "+str(value))
 
 		GPIO.output(pin,value)
 		return 0
@@ -93,14 +92,14 @@ class RaspGpio:
 		return self._gpioavailable
 
 	def getsummary(self):
-                if not self._init:
-                        return 10
+		if not self._init:
+			return 10
 
 		summary=[]
 		for pin in self._gpioavailable:
 			mode=self.getgpiomode(pin,True)
 			read=self.readgpio(pin)
-			if pin in self._comment.keys():
+			if pin in list(self._comment.keys()):
 				comment=self._comment[pin]
 			else:
 				comment=''
@@ -110,7 +109,7 @@ class RaspGpio:
 
 	def geterrorstr(self,error):
 		errorstr={0:'No error',5:'GPIO not available',6:'Incorrect State Value',7:'Incorrect Mode Value',10:'Module not initialized'}
-		if error in errorstr.keys():
+		if error in list(errorstr.keys()):
 			return errorstr[error]
 		return "Unknown error"		
 
@@ -129,10 +128,10 @@ class RaspGpio:
 	
 def main():
 	gpio=RaspGpio('/home/pi/raspadmin/conf/gpio.conf')
-	print gpio.getsummary()
+	print(gpio.getsummary())
 	gpio.setgpiomode(17,GPIO.OUT)
 	gpio.readgpio(17)
-	print gpio.getsummary()
+	print(gpio.getsummary())
 
 if __name__ == '__main__':
 	main()
