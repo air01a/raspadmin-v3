@@ -20,7 +20,7 @@ class WebManager(WebStructure.WebAbstract):
 				self.alldebrid=AllDebrid(self.alldebridtoken,self.alldebridagent)
 		except:
 			self.alldebrid=None
-				
+		
 		self.downloadManager = DownloadManager(self.path)
 		rarfile.UNRAR_TOOL = "unrar-nonfree"
 

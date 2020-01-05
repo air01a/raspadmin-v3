@@ -56,10 +56,9 @@ var ctx = document.getElementById("myChart");
 var data = {
     labels: @history.abs,
     datasets: [
-#for @data in @history:
-#if (@data!='abs')
+#for @data in @history.data:
         {
-            label: "@data",
+            label: "@data.name",
             fill: false,
             lineTension: 0.1,
             borderColor: getRandomColor("@data"),
@@ -76,10 +75,9 @@ var data = {
             pointHoverBorderWidth: 2,
             pointRadius: 1,
             pointHitRadius: 10,
-            data: @history.get(@data),
+            data: @data.temp,
             spanGaps: false,
         },
-#end
 #end
     ]
 };

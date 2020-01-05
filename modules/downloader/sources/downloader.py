@@ -24,10 +24,10 @@ class Downloader(Thread):
 
 	def run(self):
 		while self.fileToDownload()!=False:
-			url=self.aToDownload[self.__next__]['url']
+			url=self.aToDownload[self.next]['url']
 			try:
 				self.aToDownload[self.next]['id']=self.next
-				file_name = self.aToDownload[self.__next__]['path']
+				file_name = self.aToDownload[self.next]['path']
 				self.aToDownload[self.next]['state']='d'
 				with open(file_name, "wb+") as f:
 					response = requests.get(url, stream=True)

@@ -14,7 +14,6 @@ class WebManager(WebStructure.WebAbstract):
 			path=self._filemanager.path_decode(http_context.http_get['base64_file'])
 		else:
 			path='/'
-
 		dirlist=self._filemanager.list_dir_from_path(path)
 		return WebStructure.HttpContext(statuscode=200,content=json.dumps(dirlist),template=None,mimetype='text/html')
 

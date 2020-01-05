@@ -14,14 +14,15 @@ class AllDebrid:
 		try:
 			req = requests.get("https://api.alldebrid.com/hosts")
             #self._provider = [ x.lstrip()[1:-1] for x in req.content.split(',') ]
-			data = json.loads(req.content)
-
+		
+			data = json.loads(req.content.decode('utf-8'))
 			self._provider = [ x["domain"] for x in data["hosts"] ]
 			for x in data["hosts"]:
 				if "altDomains" in list(x.keys()):
 					self._provider+=x["altDomains"]
-		except:	
+		except Exception as e:	
 			self._provider= []
+			print(str(e))
 
 	def isProvider(self, url):
 		for p in self._provider:
@@ -33,7 +34,7 @@ class AllDebrid:
 
 	def getLink(self,url):
 		req = requests.get("https://api.alldebrid.com/link/unlock?agent=%s&token=%s&link=%s" % (self._agent,self._token,url),headers=self.headers)
-		data = json.loads(req.content)
+		data = json.loads(req.content.decode('utf-8'))
 
 		if "error" in list(data.keys()):
 			if data["errorCode"]!=0:

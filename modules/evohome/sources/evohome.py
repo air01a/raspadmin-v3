@@ -16,7 +16,6 @@ class EvoHome:
 		        self.apikey=config.get("EVOHOME", "apikey")
 		        self.city=config.get("EVOHOME", "city")
 
-		
 	def getCurrentValues(self):
 		ec = EvohomeClient(self.login, self.password)
 		temperatures=[]
@@ -72,5 +71,6 @@ class EvoHome:
 						result[datetime.datetime.fromtimestamp(captor[2]).hour] = captor[1]
 				results[row[0]]=result
 		results["base_hours"]=hours
+		print(results)
 		return results
 

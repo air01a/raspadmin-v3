@@ -59,8 +59,9 @@ class MiniDlna:
 		try:
 			self._internaldb=json.loads(db.read())
 			db.close()
-		except:
+		except Exception as e:
 			self._internaldb=[]
+		print(self._internaldb)
 		return 0
 
 
@@ -97,8 +98,9 @@ class MiniDlna:
 	def get_shares(self):
 		ret=[]
 		for i in self._internaldb:
-			i['b64path']=base64.b64encode(i['path'])
-			ret.append(i)
+			j=i.copy()
+			j['b64path']=base64.b64encode(i['path'].encode()).decode('utf-8')
+			ret.append(j)
 		return ret
 
 	def get_error(self,errorcode):

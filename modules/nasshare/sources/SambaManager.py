@@ -66,13 +66,15 @@ class SambaManager:
 			validuser=self._internaldb[share]['validusers'].split(',')
 			writeuser=self._internaldb[share]['writelist'].split(',')
 			self._internaldb[share]['validusers']=','.join(i for i in validuser if i in user)
-			self._internaldb[share]['writelist']=','.join(i for i in writeuser  if i in user)
-	
+			self._internaldb[share]['writelist']=','.join(i for i in writeuser  if i in user)	
+
 
 	def write_db(self,vars=None):
 		if vars==None:
 			vars=self._internaldb
+		print(vars)
 		jsondb=json.dumps(vars)
+		print(jsondb)
 		try:
 			db=open(self._dbfile,"w+")
 			db.write(jsondb)
@@ -89,7 +91,7 @@ class SambaManager:
 	def get_db(self):
 		ret=[]
 		for i in self._internaldb:
-			i['b64path']=base64.b64encode(i['path'])
+			i['b64path']=base64.b64encode(i['path'].encode('utf-8')).decode()
 			ret.append(i)
 		return ret
 

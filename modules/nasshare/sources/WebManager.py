@@ -46,7 +46,7 @@ class WebManager(WebStructure.WebAbstract):
 			if error==0:
 				self._sambamanager.write_samba_config()
 				return None
-			errorstr=self._sambamanager.get_error(error)
+			errorstr=self._sambamanager.get_error_str(error)
 			share={}
 			share['name']=name
 			share['comment']=comment
