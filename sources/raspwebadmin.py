@@ -98,7 +98,7 @@ class HttpRequestHandler(BaseHTTPRequestHandler):
 				try:
 					f = open(http_response.outputfile, "rb")
 					byte = f.read(4*1024*1024)
-					while byte != "":
+					while len(byte) != 0:
 						self.wfile.write(byte)
 						byte = f.read(4*1024*1024)
 				except:

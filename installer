@@ -164,7 +164,7 @@ if [ "$installdir" == "" ] ; then
 				[[ -f $key_path ]] || echo "Invalid path"
 			done
 		else
-                        openssl genrsa  -out $CONFIGDIR/cert.key 1024
+                        openssl genrsa  -out $CONFIGDIR/cert.key 2048
                         openssl req -new -key $CONFIGDIR/cert.key -out $CONFIGDIR/cert.csr
                         openssl x509 -req -days 4000 -in $CONFIGDIR/cert.csr -signkey $CONFIGDIR/cert.key -out $CONFIGDIR/cert.crt
                         rm -f $CONFIGDIR/cert.csr

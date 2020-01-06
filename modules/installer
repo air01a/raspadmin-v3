@@ -120,6 +120,9 @@ for mod in $module; do
 		cp -R * $installdir/static
 		cd ../
 	fi
+	if [ -f "script.sh" ] ; then
+		. ./script.sh
+	fi
 	cd ../
 	echo -e "\e[92mDone ---\e[0m"
 done
