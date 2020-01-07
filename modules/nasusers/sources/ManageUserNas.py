@@ -22,7 +22,7 @@ class ManageUser:
 	def execute(self,cmd,input=None,output=None):
 		p = subprocess.Popen(cmd, stdin=subprocess.PIPE,stderr=subprocess.STDOUT)
 		if input!=None:
-			p.stdin.write(input)
+			p.stdin.write(input.encode())
 			p.stdin.flush()
 		
 		for x in range(0, 20):
@@ -38,7 +38,6 @@ class ManageUser:
 		return p.returncode
 		
 	def createUser(self,name,username,password):
-
 		tmppass=''.join(random.choice(string.ascii_letters+string.digits) for x in range(30))
 		encPass = crypt.crypt(tmppass,"22")   
 		ret=os.system("useradd -G "+self._nasgroup+" -p "+encPass+ " -s "+ " "+ self._loginscript + " -d "+ self._home + " -m "+ " -c \""+ username+"\" " + name)
@@ -54,7 +53,7 @@ class ManageUser:
 			cmd = [PASSWD_CMD, '-s',user]
 		strstdin='%(p)s\n%(p)s\n' % { 'p': password }
 
-		return 20*self.execute(cmd,strstdin)	
+		return 20*self.execute(cmd,strstdin)
 
 	def list_user(self,startwith=None):
 		user=[]
