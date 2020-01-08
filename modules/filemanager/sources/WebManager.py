@@ -135,7 +135,7 @@ class WebManager(WebStructure.WebAbstract):
 			src=post['file_upload']
 			
 			byte = src.read(4*1024*1024)
-			while byte != "":
+			while len(byte) != 0:
 				dst.write(byte)
 				byte = src.read(4*1024*1024)
 		except:

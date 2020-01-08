@@ -94,14 +94,15 @@ def getUptime(text=False):
 
 def getTemperature():
 	try:
-		s = subprocess.check_output(["/usr/bin/vcgencmd","measure_temp"])
+		s = subprocess.check_output(["/usr/bin/vcgencmd","measure_temp"]).decode('utf-8')
 		return float(s.replace("temp=","").replace("'C\n",""))
-	except:
+	except Exception as e:
+		print(str(e))
 		return 0
 
 def getCpuFrequency():
 	try:
-		s = subprocess.check_output(["/usr/bin/vcgencmd","measure_clock arm"])
+		s = subprocess.check_output(["/usr/bin/vcgencmd","measure_clock arm"]).decode('utf-8')
 		return int(s.split("=")[1].replace("'C\n",""))
 	except:
 		return 0

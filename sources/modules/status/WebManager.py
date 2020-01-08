@@ -44,7 +44,7 @@ class WebManager(WebStructure.WebAbstract):
 		loadavg=status.getLoadAvg()	
 		hostname=status.getHostName()
 	
-		cpufrequency=str(status.getCpuFrequency()/1000000)+" Mhz"
+		cpufrequency=str(int(status.getCpuFrequency()/1000000))+" Mhz"
 		
 		for d in disk:
 			if d['mountpoint']=='/':
