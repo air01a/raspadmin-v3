@@ -8,8 +8,8 @@ By default, there is only 2 modules, status which show you information about you
 
 You can add your own module very easily, all the instructions are in the createmodule text file.
 
-![Alt text](http://www.parlonssecurite.com/raspadmin/intstatus.PNG "Web interace screenshot")
+![Alt text](https://github.com/air01a/raspadmin-v3/raw/master/images/general.png "Web interface screenshot")
 
 See the wiki page to view some screenshots of this interface...
-[Wiki home page](https://github.com/air01a/raspadmin/wiki)
+[Wiki home page](https://github.com/air01a/raspadmin-v3/wiki)
 
