@@ -3,24 +3,21 @@ import json
 
 class AllDebrid:
 	def __init__(self, token,agent):
-		self._getProvider()
 		self._token=token
 		self._agent=agent
+		self._getProvider()
 		self.headers = {
                         	'User-Agent': 'raspadmin_v1'
                 	}
 
 	def _getProvider(self):
 		try:
-			req = requests.get("https://api.alldebrid.com/hosts")
-            #self._provider = [ x.lstrip()[1:-1] for x in req.content.split(',') ]
-		
-			data = json.loads(req.content.decode('utf-8'))
-			self._provider = [ x["domain"] for x in data["hosts"] ]
-			for x in data["hosts"]:
-				if "altDomains" in list(x.keys()):
-					self._provider+=x["altDomains"]
-		except Exception as e:	
+			req = requests.get("https://api.alldebrid.com/v4/hosts?agent=%s" % (self._agent))
+			data = json.loads(req.content)["data"]
+			self._provider = []
+			for x in data['hosts']:
+				self._provider+=data['hosts'][x]["domains"]
+		except Exception as e:
 			self._provider= []
 			print(str(e))
 
@@ -33,14 +30,12 @@ class AllDebrid:
 
 
 	def getLink(self,url):
-		req = requests.get("https://api.alldebrid.com/link/unlock?agent=%s&token=%s&link=%s" % (self._agent,self._token,url),headers=self.headers)
+		req = requests.get("https://api.alldebrid.com/v4/link/unlock?agent=%s&apikey=%s&link=%s" % (self._agent,self._token,url),headers=self.headers)
 		data = json.loads(req.content.decode('utf-8'))
-
 		if "error" in list(data.keys()):
-			if data["errorCode"]!=0:
-				print(data)
-				print((data["errorCode"]))
-			return (data["error"],"")
+			print(data)
+			print((data["error"]["message"]))
+			return (1,data["error"]["message"])
 		else:
-			return (0,data["infos"]["link"])
+			return (0,data["data"]["link"])
 
